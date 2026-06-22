@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121214">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121214;
+    --surface:#1B1B1F;
+    --surface-2:#232328;
+    --border:#2E2E34;
+    --text:#EEEEE6;
+    --muted:#8C8C93;
+    --accent:#FF5E3A;
+    --accent-dim:rgba(255,94,58,0.14);
+    --success:#BFE94B;
+    --success-dim:rgba(191,233,75,0.14);
+    --warn:#FFC857;
+    --warn-dim:rgba(255,200,87,0.12);
+    --danger:#FF6B6B;
+    --sun:#7C8CFF;
+    --sun-dim:rgba(124,140,255,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:28px 16px 60px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:28px;
+    margin:0 0 18px;
+  }
+
+  .monthnav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .navbtn{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    padding:7px 10px;
+    border-radius:7px;
+    cursor:pointer;
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+  .navbtn:hover{border-color:var(--muted);}
+  .navbtn:disabled{opacity:0.35;cursor:not-allowed;}
+  .monthlabel{
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    font-size:16px;
+    text-transform:uppercase;
+    text-align:center;
+    flex:1;
+  }
+
+  .totalcard{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:18px;
+  }
+  .total-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:4px;
+  }
+  .total-num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:34px;
+    font-weight:600;
+    color:var(--accent);
+  }
+  .total-delta{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    margin-top:4px;
+  }
+  .delta-up{color:var(--danger);}
+  .delta-down{color:var(--success);}
+  .delta-flat{color:var(--muted);}
+
+  .section-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin:20px 0 10px;
+  }
+
+  .catbar-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .catdot{
+    width:9px;height:9px;border-radius:50%;flex:0 0 auto;
+  }
+  .catbar-name{
+    font-size:12.5px;
+    min-width:78px;
+    flex:0 0 auto;
+  }
+  .catbar-track{
+    flex:1;
+    height:8px;
+    background:var(--surface-2);
+    border-radius:5px;
+    overflow:hidden;
+  }
+  .catbar-fill{
+    height:100%;
+    border-radius:5px;
+  }
+  .catbar-amt{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--muted);
+    min-width:70px;
+    text-align:right;
+    flex:0 0 auto;
+  }
+  .empty-note{
+    color:var(--muted);
+    font-size:13px;
+    font-style:italic;
+  }
+
+  .addcard{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px;
+    margin:14px 0 24px;
+  }
+  .chiprow{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:12px;
+  }
+  .chip{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    padding:5px 10px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text);
+    cursor:pointer;
+  }
+  .chip.active{
+    border-color:var(--accent);
+    background:var(--accent-dim);
+    color:var(--accent);
+  }
+  .formrow{
+    display:flex;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .formrow input{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:9px 10px;
+  }
+  #amountInput{flex:1; font-family:'JetBrains Mono',monospace; font-size:16px;}
+  #catInput{flex:1;}
+  #dateInput{flex:0 0 auto; font-family:'JetBrains Mono',monospace; font-size:13px;}
+  #noteInput{width:100%;}
+  .formrow input:focus{outline:none;border-color:var(--accent);}
+  .addbtn{
+    width:100%;
+    background:var(--accent);
+    border:none;
+    color:#14150F;
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    font-size:14px;
+    padding:11px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .addbtn:hover{opacity:0.9;}
+
+  .daygroup{margin-bottom:14px;}
+  .daygroup-head{
+    display:flex;
+    justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    padding:0 2px 6px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:6px;
+  }
+  .entry-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 2px;
+  }
+  .entry-cat{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    min-width:90px;
+    flex:0 0 auto;
+  }
+  .entry-cat-name{font-size:13px;}
+  .entry-note{
+    flex:1;
+    font-size:12.5px;
+    color:var(--muted);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .entry-amt{
+    font-family:'JetBrains Mono',monospace;
+    font-size:14px;
+    flex:0 0 auto;
+  }
+  .entry-del{
+    background:none;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    flex:0 0 auto;
+    padding:4px 6px;
+    border-radius:5px;
+  }
+  .entry-del.confirming{
+    background:var(--danger);
+    color:#14150F;
+  }
+  .loading{
+    color:var(--muted);
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    padding:40px 0;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="loading">loading…</div></div>
+
+<script>
+// Local storage shim — mirrors the storage interface so the rest of
+// the app logic stays the same, but actually persists in this browser.
+const storage = {
+  async get(key){
+    const v = localStorage.getItem(key);
+    if(v===null) return null;
+    return {key, value:v};
+  },
+  async set(key, value){
+    localStorage.setItem(key, value);
+    return {key, value};
+  }
+};
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
+const CATEGORIES = [
+  {name:'Petrol', color:'#FF5E3A'},
+  {name:'Food', color:'#FFC857'},
+  {name:'Groceries', color:'#BFE94B'},
+  {name:'Bills', color:'#7C8CFF'},
+  {name:'Shopping', color:'#FF7AC6'},
+  {name:'Gym', color:'#4ED8C0'},
+  {name:'Other', color:'#8C8C93'},
+];
+const FALLBACK_PALETTE = ['#FF5E3A','#FFC857','#BFE94B','#7C8CFF','#FF7AC6','#4ED8C0','#FFA3A3','#9D8CFF'];
+
+function pad(n){return n<10?'0'+n:''+n;}
+function fmtMoney(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
+function monthKey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1); }
+function monthLabel(d){
+  const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return names[d.getMonth()] + ' ' + d.getFullYear();
+}
+function daysInMonth(d){ return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate(); }
+function fmtDateKey(y,m,day){ return y+'-'+pad(m+1)+'-'+pad(day); }
+
+function catColor(name){
+  const found = CATEGORIES.find(c => c.name.toLowerCase() === (name||'').toLowerCase());
+  if(found) return found.color;
+  let hash = 0;
+  for(let i=0;i<name.length;i++){ hash = (hash*31 + name.charCodeAt(i)) % FALLBACK_PALETTE.length; }
+  return FALLBACK_PALETTE[Math.abs(hash)];
+}
+
+const realToday = new Date();
+let monthOffset = 0;
+
+function computeMonth(offset){
+  const d = new Date(realToday.getFullYear(), realToday.getMonth()+offset, 1);
+  return d;
+}
+
+let viewMonth = computeMonth(0);
+let entries = [];        // entries for the viewed month
+let prevTotal = null;    // total for the month before the viewed one
+let pendingDeleteId = null;
+
+async function loadMonth(d){
+  const key = 'expenses:'+monthKey(d);
+  try{
+    const res = await storage.get(key);
+    if(res && res.value) return JSON.parse(res.value);
+  }catch(e){}
+  return [];
+}
+async function saveMonth(d, list){
+  const key = 'expenses:'+monthKey(d);
+  try{ await storage.set(key, JSON.stringify(list)); }catch(e){}
+}
+
+async function loadView(){
+  entries = await loadMonth(viewMonth);
+  const prevMonthDate = computeMonth(monthOffset-1);
+  const prevList = await loadMonth(prevMonthDate);
+  prevTotal = prevList.reduce((s,e)=>s+e.amount,0);
+}
+
+async function switchMonth(newOffset){
+  if(newOffset > 0) return;
+  monthOffset = newOffset;
+  viewMonth = computeMonth(monthOffset);
+  document.getElementById('app').innerHTML = '<div class="loading">loading…</div>';
+  await loadView();
+  render();
+}
+
+async function init(){
+  await loadView();
+  render();
+}
+
+function monthTotal(){ return entries.reduce((s,e)=>s+e.amount,0); }
+
+function categoryBreakdown(){
+  const map = {};
+  entries.forEach(e=>{ map[e.category] = (map[e.category]||0) + e.amount; });
+  return Object.entries(map).sort((a,b)=>b[1]-a[1]);
+}
+
+function groupByDay(){
+  const groups = {};
+  entries.forEach(e=>{ (groups[e.date] = groups[e.date] || []).push(e); });
+  const dates = Object.keys(groups).sort((a,b)=> b.localeCompare(a));
+  return dates.map(date => ({
+    date,
+    items: groups[date].sort((a,b)=> b.ts - a.ts),
+    subtotal: groups[date].reduce((s,e)=>s+e.amount,0)
+  }));
+}
+
+function dayHeaderLabel(dateStr){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
+  return wd + ' ' + pad(d) + '/' + pad(m);
+}
+
+let activeChip = 'Petrol';
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.innerHTML = `<div class="eyebrow">money tracked</div><h1>Expense Tracker</h1>`;
+  app.appendChild(header);
+
+  // month nav
+  const isCurrent = monthOffset === 0;
+  const nav = document.createElement('div');
+  nav.className = 'monthnav';
+  nav.innerHTML = `
+    <button class="navbtn" id="prevBtn">‹ prev</button>
+    <div class="monthlabel">${monthLabel(viewMonth)}${isCurrent ? ' · this month' : ''}</div>
+    <button class="navbtn" id="nextBtn" ${isCurrent?'disabled':''}>next ›</button>
+  `;
+  app.appendChild(nav);
+  nav.querySelector('#prevBtn').onclick = ()=> switchMonth(monthOffset-1);
+  nav.querySelector('#nextBtn').onclick = ()=> switchMonth(monthOffset+1);
+
+  // total card
+  const total = monthTotal();
+  let deltaHtml = '';
+  if(prevTotal === 0 && total > 0){
+    deltaHtml = `<div class="total-delta delta-flat">no spending logged last month to compare</div>`;
+  } else if(prevTotal > 0){
+    const pct = Math.round(((total - prevTotal)/prevTotal)*100);
+    const cls = pct > 0 ? 'delta-up' : (pct < 0 ? 'delta-down' : 'delta-flat');
+    const sign = pct > 0 ? '+' : '';
+    deltaHtml = `<div class="total-delta ${cls}">${sign}${pct}% vs last month (${fmtMoney(prevTotal)})</div>`;
+  }
+  const totalCard = document.createElement('div');
+  totalCard.className = 'totalcard';
+  totalCard.innerHTML = `
+    <div class="total-label">total spent</div>
+    <div class="total-num">${fmtMoney(total)}</div>
+    ${deltaHtml}
+  `;
+  app.appendChild(totalCard);
+
+  // category breakdown
+  const catLabel = document.createElement('div');
+  catLabel.className = 'section-label';
+  catLabel.textContent = 'by category';
+  app.appendChild(catLabel);
+
+  const breakdown = categoryBreakdown();
+  if(breakdown.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'empty-note';
+    empty.textContent = 'Nothing logged yet this month.';
+    app.appendChild(empty);
+  } else {
+    const max = breakdown[0][1];
+    breakdown.forEach(([name, amt])=>{
+      const row = document.createElement('div');
+      row.className = 'catbar-row';
+      const color = catColor(name);
+      row.innerHTML = `
+        <div class="catdot" style="background:${color}"></div>
+        <div class="catbar-name">${name}</div>
+        <div class="catbar-track"><div class="catbar-fill" style="width:${(amt/max*100)}%;background:${color}"></div></div>
+        <div class="catbar-amt">${fmtMoney(amt)}</div>
+      `;
+      app.appendChild(row);
+    });
+  }
+
+  // add form
+  const addLabel = document.createElement('div');
+  addLabel.className = 'section-label';
+  addLabel.textContent = 'log an expense';
+  app.appendChild(addLabel);
+
+  const monthStart = fmtDateKey(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
+  const monthEnd = fmtDateKey(viewMonth.getFullYear(), viewMonth.getMonth(), daysInMonth(viewMonth));
+  const defaultDate = isCurrent ? fmtDateKey(realToday.getFullYear(), realToday.getMonth(), realToday.getDate()) : monthEnd;
+
+  const addCard = document.createElement('div');
+  addCard.className = 'addcard';
+  addCard.innerHTML = `
+    <div class="chiprow" id="chipRow"></div>
+    <div class="formrow">
+      <input id="amountInput" type="number" inputmode="decimal" placeholder="Amount" min="0" step="1">
+      <input id="catInput" type="text" placeholder="Category" value="${activeChip}">
+    </div>
+    <div class="formrow">
+      <input id="noteInput" type="text" placeholder="Note (optional)">
+    </div>
+    <div class="formrow">
+      <input id="dateInput" type="date" value="${defaultDate}" min="${monthStart}" max="${monthEnd}">
+    </div>
+    <button class="addbtn" id="addBtn">Add expense</button>
+  `;
+  app.appendChild(addCard);
+
+  const chipRow = addCard.querySelector('#chipRow');
+  CATEGORIES.forEach(c=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (c.name===activeChip?' active':'');
+    chip.textContent = c.name;
+    chip.onclick = ()=>{
+      activeChip = c.name;
+      addCard.querySelector('#catInput').value = c.name;
+      chipRow.querySelectorAll('.chip').forEach(el=>el.classList.remove('active'));
+      chip.classList.add('active');
+    };
+    chipRow.appendChild(chip);
+  });
+
+  addCard.querySelector('#addBtn').onclick = async ()=>{
+    const amtEl = addCard.querySelector('#amountInput');
+    const catEl = addCard.querySelector('#catInput');
+    const noteEl = addCard.querySelector('#noteInput');
+    const dateEl = addCard.querySelector('#dateInput');
+    const amount = parseFloat(amtEl.value);
+    if(!amount || amount <= 0){ amtEl.focus(); return; }
+    const category = (catEl.value || 'Other').trim();
+    const date = dateEl.value || defaultDate;
+    entries.push({
+      id: Date.now()+'-'+Math.random().toString(36).slice(2,7),
+      amount, category, note: noteEl.value.trim(), date, ts: Date.now()
+    });
+    await saveMonth(viewMonth, entries);
+    render();
+  };
+
+  // entries list
+  const listLabel = document.createElement('div');
+  listLabel.className = 'section-label';
+  listLabel.textContent = "this month's entries";
+  app.appendChild(listLabel);
+
+  const groups = groupByDay();
+  if(groups.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'empty-note';
+    empty.textContent = 'No expenses logged yet.';
+    app.appendChild(empty);
+  }
+  groups.forEach(g=>{
+    const dg = document.createElement('div');
+    dg.className = 'daygroup';
+    dg.innerHTML = `<div class="daygroup-head"><span>${dayHeaderLabel(g.date)}</span><span>${fmtMoney(g.subtotal)}</span></div>`;
+    g.items.forEach(e=>{
+      const row = document.createElement('div');
+      row.className = 'entry-row';
+      const color = catColor(e.category);
+      const confirming = pendingDeleteId === e.id;
+      row.innerHTML = `
+        <div class="entry-cat"><div class="catdot" style="background:${color}"></div><div class="entry-cat-name">${e.category}</div></div>
+        <div class="entry-note">${e.note || ''}</div>
+        <div class="entry-amt">${fmtMoney(e.amount)}</div>
+        <button class="entry-del ${confirming?'confirming':''}">${confirming ? 'sure?' : '×'}</button>
+      `;
+      row.querySelector('.entry-del').onclick = async ()=>{
+        if(pendingDeleteId === e.id){
+          entries = entries.filter(x=>x.id!==e.id);
+          pendingDeleteId = null;
+          await saveMonth(viewMonth, entries);
+          render();
+        } else {
+          pendingDeleteId = e.id;
+          render();
+          setTimeout(()=>{ if(pendingDeleteId===e.id){ pendingDeleteId=null; render(); } }, 4000);
+        }
+      };
+      dg.appendChild(row);
+    });
+    app.appendChild(dg);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
